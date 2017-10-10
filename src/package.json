@@ -1,0 +1,14 @@
+{
+  "name": "googlesheets_automation",
+  "version": "1.0.0",
+  "description": "App for Zendesk Marketplace, tracking tickets and storing them inside a Google Sheet",
+  "main": "Gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Skyler Hartle",
+  "license": "ISC",
+  "dependencies": {
+    "path": "^0.12.7"
+  }
+}
