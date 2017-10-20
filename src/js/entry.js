@@ -4,4 +4,6 @@ var zendesk = require('./zendesk_sdk');
 // zendesk.generateModal();
 
 zendesk.initializeApp();
-common.displayHtml();
+common.onInit();
+
+// common.displayHtml();
