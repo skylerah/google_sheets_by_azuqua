@@ -91,18 +91,12 @@ common.displayHtml = function() {
 common.generateAuthHandlers = function() {
   var client = ZAFClient.init();
   client.context().then(function(context) {
-
-    //helper FLO that is called, getInstanceId, that returns back the appropriate instanceId based on the JWT
-    //phill needs to make this
-
-    var instanceId = 'getInstanceId';
-
     var date = Date.now();
     var subdomain = context.account.subdomain;
 
-    var configName = instanceId.concat(date);
-    var zendeskAuth = 'https://designer2.azuqua.com/app/oauth/zendeskoauth2/authorize?app_token=azq_apps&orgId=6105&configName=' + configName + '&version=1.0.39&subdomain=' + subdomain;
-    var gsheetsAuth = '';
+    var configName = subdomain.concat(date);
+    var zendeskAuth = 'https://designer2.azuqua.com/app/oauth/zendeskoauth2/authorize?app_token=azq_apps&orgId=6160&configName=' + configName + '&version=1.0.39&subdomain=' + subdomain;
+    var gsheetsAuth = 'https://designer2.azuqua.com/app/oauth/googlesheets2_29/authorize?app_token=azq_apps&orgId=6160&configName=' + configName + '&version=0.2.13&subdomain=' + subdomain;
 
     $('#zendesk-auth').click(function(e) {
       var zendeskAuthWindow = window.open(zendeskAuth, 'Authorize to Zendesk', 'resizable,scrollbars,status,width=650,height=650');
