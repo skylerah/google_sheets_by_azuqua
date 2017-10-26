@@ -88,38 +88,24 @@ var client = ZAFClient.init();
 
 var floMap = {
   main: {
-    alias: 'f6ecf46d61e99b0bdc005ae2e642ea81',
-    token: '67c5f43d99c9dfc4a18fa96f5a0d00dafa532ea1fcdb37deb882ddf3665c4944',
     id: 38081
   },
   install: {
-    alias: '2e46f6823a641dc08afdda5c71c3e5ec',
-    token: 'e07a421eb6fa4a8789eda7c0a20d15fc7d942e66bb2809ee1ee85e1324658eff',
     id: 38083
   },
   updateInstanceSettings: {
-    alias: '5f8edd0cbbc730653656697031e2b981',
-    token: '1c9d7093a5aed45b14013fc0ec1da435f1d1a512fbb8d7415708f3863e471e1b',
     id: 38078
   },
   getState: {
-    alias: 'dace07e1852ff063eb57aa3f001027e5',
-    token: 'c7236d091c6d7fdd9f143d85116f97b6d91f1abc2ee7d767dad8606164ba2de1',
     id: 38153
   },
   updateConfigurationStatus: {
-    alias: 'a0d14677e54f8bce5b642252355d742c',
-    token: '7eba6b231cf05e2f923ccf5da8ec347a1762c5a16dff8da102e4975d85463d4f',
     id: 38080
   },
   updateConnectorAccountConfigs: {
-    alias: 'e1eccef4a71da985f2978780208dfa2f',
-    token: 'ad9a448b8295f5589c1dbd45471a586efd97396cb84342038f6025ad14e8c0ed',
     id: 38082
   },
   createGoogleSheet: {
-    alias: '1eb965efb3f935152627d0f7a929113f',
-    token: '641410f2b538e0c1091dd090c816ed9dbe5fc1646f62f38a81496b709534c794',
     id: 38882
   }
 
@@ -131,11 +117,10 @@ invokeFlo = function(name, data, cb) {
   var token = floMap[name].token;
   var floId = floMap[name].id;
 
-  $.post({url: 'https://api.azuqua.com/flo/' + alias + '/invoke?clientToken=' + token, data: data}, function(response) {
+  studio.invokeFlo(floId, data, function(error, data) {
     console.log('invoking', name);
     cb(response);
   });
-
 };
 
 common.onInit = function() {

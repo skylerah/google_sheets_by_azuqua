@@ -1,12 +1,12 @@
 {
-  "name": "Google Sheets Reporting",
+  "name": "Google Sheets by Azuqua",
   "author": {
     "name": "Skyler Hartle",
     "email": "skyler@azuqua.com",
     "url": ""
   },
   "defaultLocale": "en",
-  "private": true,
+  "private": false,
   "location": {
     "support": {
       "top_bar": "assets/iframe.html"
