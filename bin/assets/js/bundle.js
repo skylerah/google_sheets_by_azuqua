@@ -82,6 +82,8 @@ common.onInit();
 /* 1 */
 /***/ (function(module, exports) {
 
+//not split up...
+
 var common = {};
 
 var client = ZAFClient.init();
@@ -111,15 +113,13 @@ var floMap = {
 
 };
 
-
 invokeFlo = function(name, data, cb) {
-  var alias = floMap[name].alias;
-  var token = floMap[name].token;
+  // var alias = floMap[name].alias;
+  // var token = floMap[name].token;
   var floId = floMap[name].id;
 
   studio.invokeFlo(floId, data, function(error, data) {
-    console.log('invoking', name);
-    cb(response);
+    cb(data);
   });
 };
 
@@ -147,7 +147,6 @@ globalStateHandler = function() {
         generateAuthView();
       }
       if (view === '/') {
-        console.log('app view');
         generateView(view);
       }
     });
@@ -179,9 +178,8 @@ getState = function(cb) {
   client.context().then(function(context) {
     //get state FLO
     invokeFlo('getState', {instanceName: context.account.subdomain + '.zendesk.com'}, function(state) {
-      console.log(state, typeof state, state.authObject);
-      var parsedState = JSON.parse(state);
-      cb(parsedState);
+      // var parsedState = JSON.parse(state);
+      cb(state);
     });
   });
 };
@@ -236,7 +234,6 @@ generateAuthObjects = function(cb) {
 
 generateAuthView = function() {
   getState(function(state) {
-    console.log(state, typeof state);
     state.objectArray.forEach(function(object) {
       if (object.complete === false) {
         $('#' + object.id).html('<button style="width: 200px;" class="c-btn c-btn--primary" id="' + object.id + '">Connect to ' + object.prettyName + ' </button>');
@@ -305,31 +302,6 @@ zendesk.initializeApp = function() {
     height: 250,
     width: 350
   });
-};
-
-
-//old, from modal version
-zendesk.generateModal = function() {
-    client.on('app.registered', function(context) {
-      console.log(context);
-        if (context.context.location === 'background') {
-            client.invoke('instances.create', {
-                location: 'modal',
-                url: 'assets/iframe.html'
-            }).then(function(modalContext) {
-                console.log('fired off the modal successfully');
-                var modalClient = client.instance(modalContext['instances.create'][0].instanceGuid);
-                modalClient.invoke('resize', {
-                    width: '400px',
-                    height: '350px'
-                });
-
-                modalClient.on('modal.close', function() {
-                    console.log('user just closed the modal');
-                });
-            });
-        }
-    });
 };
 
 module.exports = zendesk;
