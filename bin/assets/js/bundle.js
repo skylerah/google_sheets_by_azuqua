@@ -82,8 +82,6 @@ common.onInit();
 /* 1 */
 /***/ (function(module, exports) {
 
-//not split up...
-
 var common = {};
 
 var client = ZAFClient.init();
@@ -119,7 +117,11 @@ invokeFlo = function(name, data, cb) {
   var floId = floMap[name].id;
 
   studio.invokeFlo(floId, data, function(error, data) {
-    cb(data);
+    if (error) {
+      cb(error);
+    } else if (data) {
+      cb(data);
+    }
   });
 };
 
@@ -132,15 +134,19 @@ globalStateHandler = function() {
     var subdomain = context.account.subdomain;
     var instanceName = subdomain + '.zendesk.com';
 
-    invokeFlo('main', {instanceName: instanceName}, function(state) {
+
+    invokeFlo('main', {instanceName: instanceName}, function(state) { 
       var view = state.path;
       if (view === '/install') {
-        generateView(view);
-        invokeFlo('install', {instanceName: instanceName}, function(response) {
-          generateAuthObjects(function() {
-            generateAuthView();
+        client.get('currentUser').then(function (user) {
+          var currentUser = user.currentUser;
+          invokeFlo('install', { instanceName: instanceName, currentUser: currentUser }, function (response) {
+            generateAuthObjects(function () {
+              generateAuthView();
+            });
           });
         });
+        generateView(view);
       }
       if (view === '/authorize') {
         generateView(view);
@@ -238,6 +244,7 @@ generateAuthView = function() {
       if (object.complete === false) {
         $('#' + object.id).html('<button style="width: 200px;" class="c-btn c-btn--primary" id="' + object.id + '">Connect to ' + object.prettyName + ' </button>');
       } else if (object.complete === true) {
+        $('#' + object.id).off('click');
         $('#' + object.id).html('<div><strong>... authorized!</strong></div>');
       }
     });
@@ -251,32 +258,51 @@ attachAuthHandlers = function(state) {
     state.objectArray.forEach(function(object) {
       $('#' + object.id).click(function(e) {
         $(this).html('Authorizing...');
-        object.complete = true;
+        $(this).off('click');
         var authWindow = window.open(object.authUrl, 'Authorize to ' + object.prettyName, 'resizable,scrollbars,status,width=650,height=650');
         var pollTimer = window.setInterval(function() {
             if (authWindow.closed !== false) {
               window.clearInterval(pollTimer);
               if (object.id === 'zendesk-auth') {
-                invokeFlo('updateConfigurationStatus', {stepNumber: 1, completed: true, instanceName: instanceName}, function(response) {
-                  var stringifiedState = JSON.stringify(state);
-                  invokeFlo('updateConnectorAccountConfigs', {accountName: object.configName, connectorVersion: object.version, connectorName: object.name, instanceName: instanceName}, function() {
-                    invokeFlo('updateInstanceSettings', {instanceName: context.account.subdomain + '.zendesk.com', settings: stringifiedState}, function() {
-                      globalStateHandler();
+                console.log('invoking connector account configs');
+                invokeFlo('updateConnectorAccountConfigs', {accountName: object.configName, connectorVersion: object.version, connectorName: object.name, instanceName: instanceName}, function(response) {
+                  console.log(response);
+                  if (response.status !== undefined) {
+                    console.log('hit an error', response);
+                    $('#' + object.id).html('<strong>Failed to authorize. Please reload the app to try again.</strong>');
+                  } else {
+                    object.complete = true;
+                    var stringifiedState = JSON.stringify(state);
+                    invokeFlo('updateConfigurationStatus', {stepNumber: 1, completed: true, instanceName: instanceName, settings: stringifiedState}, function(response) {
+                      if (response.status !== undefined) {
+                        console.log('hit an error', response);
+                        $('#' + object.id).html('<strong>Failed to authorize. Please reload the app to try again.</strong>');
+                      } else {
+                        globalStateHandler();
+                      }
                     });
-                  });
+                  }
                 });
               }
               if (object.id === 'gsheets-auth') {
-                invokeFlo('updateConfigurationStatus', {stepNumber: 2, completed: true, instanceName: instanceName}, function(response) {
-                  object.complete = true;
-                  invokeFlo('updateConnectorAccountConfigs', {accountName: object.configName, connectorVersion: object.version, connectorName: object.name, instanceName: instanceName}, function() {
+                invokeFlo('updateConnectorAccountConfigs', {accountName: object.configName, connectorVersion: object.version, connectorName: object.name, instanceName: instanceName}, function(response) {
+                  console.log('invoking updateconnectoraccountconfigs', response, response.status);
+                  if (response.status !== undefined) {
+                    console.log('hit an error', response);
+                    $('#' + object.id).html('<strong>Failed to authorize. Please reload the app to try again.</strong>');
+                  } else {
+                    object.complete = true;
                     var stringifiedState = JSON.stringify(state);
-                    invokeFlo('updateInstanceSettings', {instanceName: context.account.subdomain + '.zendesk.com', settings: stringifiedState}, function() {
-                      invokeFlo('createGoogleSheet', {instanceName: instanceName}, function() {
+                    invokeFlo('updateConfigurationStatus', {settings: stringifiedState, stepNumber: 2, completed: true, instanceName: instanceName}, function(response) {
+                      console.log('invoking updateconfigurationstatus', response, response.status);
+                      if (response.status !== undefined) {
+                        console.log('hit an error', response);
+                        $('#' + object.id).html('<strong>Failed to authorize. Please reload the app to try again.</strong>');
+                      } else {
                         globalStateHandler();
-                      });
+                      }
                     });
-                  });
+                  }
                 });
               }
             }

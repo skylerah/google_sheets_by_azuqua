@@ -9,4 +9,6 @@ zendesk.initializeApp = function() {
   });
 };
 
+client.invoke('preloadPane');
+
 module.exports = zendesk;
